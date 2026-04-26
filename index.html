@@ -2191,6 +2191,67 @@ function renderNutrition() {
       </div>
     </div>`).join('');
 }
+  <script>
+async function submitConsultation() {
+  const btn = document.getElementById("submit-btn");
+  const errorBox = document.getElementById("error-box");
+  const reportWrap = document.getElementById("report-wrap");
+  const reportBody = document.getElementById("report-body");
+
+  btn.disabled = true;
+  errorBox.classList.remove("show");
+
+  const data = {
+    name: document.getElementById("p-name").value,
+    age: document.getElementById("p-age").value,
+    sex: document.getElementById("p-sex").value,
+    weight: document.getElementById("p-weight").value,
+    duration: document.getElementById("p-duration").value,
+    pain: document.getElementById("p-pain").value,
+    conditions: document.getElementById("p-conditions").value,
+    allergies: document.getElementById("p-allergies").value,
+    description: document.getElementById("p-desc").value,
+    symptoms: "user selected symptoms"
+  };
+
+  if (!data.description) {
+    errorBox.innerText = "Please describe your symptoms.";
+    errorBox.classList.add("show");
+    btn.disabled = false;
+    return;
+  }
+
+  try {
+    document.getElementById("loading-wrap").classList.add("show");
+
+    const res = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(data)
+    });
+
+    const result = await res.json();
+
+    document.getElementById("loading-wrap").classList.remove("show");
+
+    if (!res.ok) {
+      throw new Error(result.error || "AI request failed");
+    }
+
+    reportWrap.classList.add("show");
+    reportBody.innerText = result.reply;
+
+  } catch (err) {
+    document.getElementById("loading-wrap").classList.remove("show");
+    errorBox.innerText = err.message;
+    errorBox.classList.add("show");
+  }
+
+  btn.disabled = false;
+}
+</script>
 
 // ══════════ INIT ══════════
 renderEncyclopedia();
